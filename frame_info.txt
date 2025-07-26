@@ -1,0 +1,9 @@
+Frame Analysis Report
+==================================================
+
+Total Frames: 0
+Keyframes (I-frames): 0
+P-frames: 0
+
+Frame Details:
+--------------------------------------------------
