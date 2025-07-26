@@ -16,7 +16,7 @@ An Android auto reroller for Blue Archive
 9. In your terminal and enter `adb pair IP:PORT`. Replace `IP:PORT` with the ip and port shown previously. You should be prompted on your phone, accept it.
 10. Run `adb connect IP:PORT_2`. This should be the same IP of your device but the port should be different.
 11. Run `adb devices`, you should see your device listed
-12. Now run the below commands to run the scrcpy server on your phone
+12. Now run the below commands
 ```sh
 adb push scrcpy-server-v3.3.1 /data/local/tmp/scrcpy-server-manual.jar
 
@@ -24,6 +24,6 @@ adb forward tcp:1234 localabstract:scrcpy
 
 adb shell CLASSPATH=/data/local/tmp/scrcpy-server-manual.jar app_process / com.genymobile.scrcpy.Server 3.3.1 tunnel_forward=true audio=false control=false cleanup=false raw_stream=true max_size=1920
 ```
-13. Now in a different terminal git clone this repo and cd into it
-14. Then run `python main.py` to connect to the server and render the video display
+13. Now in a different terminal git clone this repo, `cd` into it, then run `pip install -r requirements.txt`
+14. Then run `python main.py` to connect and render your phone's display
 15. DONE! :D
