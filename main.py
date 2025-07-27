@@ -8,7 +8,7 @@ from icecream import ic
 import subprocess
 
 # --- Configuration ---
-# Set to your device serial if you have more than 1 device connected to adb. 
+# Set to your device serial if you have more than 1 device connected to adb.
 # You can find by typing `adb devices`. Example serials: adb-RJV8-su22._adb-tls-connect._tcp, 192.168.1.2:25345
 DEVICE_SERIAL = "" 
 
@@ -57,8 +57,6 @@ class H264Renderer:
         threading.Thread(target=adb_tap,args=(event.x,event.y,),daemon=True).start()
         ic(event)
 
-
-
     def on_close(self):
         """Handle window closing."""
         print("[!] Window closed, shutting down.")
@@ -87,7 +85,6 @@ class H264Renderer:
                     packets = self.codec.parse(data)
                     for packet in packets:
                         frames = self.codec.decode(packet)
-                        # print(random.randint(0,10000),"frames ",frames)
                         for frame in frames: 
                             with self.lock: # Acquires lock for ctx
                                 self.latest_frame = frame.to_image() 
@@ -128,22 +125,39 @@ class H264Renderer:
         # Schedule the next render. ~30 FPS is plenty for rendering.
         self.root.after(33, self.render_latest_frame)
 
+scrcpy_server_process:subprocess.Popen[str]|None=None
+def setup_scrcpy_server():
+    global scrcpy_server_process
+    print("[*] Setting up srcpy server")
+    subprocess.run("adb forward tcp:1234 localabstract:scrcpy",check=True)
 
-# def setup_scrcpy_server():
-#     print("[*] Setting up srcpy server")
-#     subprocess.run("adb forward tcp:1234 localabstract:scrcpy",check=True)
-#     subprocess.run("adb shell CLASSPATH=/data/local/tmp/scrcpy-server-manual.jar app_process / com.genymobile.scrcpy.Server 3.3.1 tunnel_forward=true audio=false control=false cleanup=false raw_stream=true max_size=1920",check=True)
-#     print("[*] Scrcpy server setup complete")
+    print("[*] Waiting for server to start...")
+    cmd=(
+        "adb shell CLASSPATH=/data/local/tmp/scrcpy-server-manual.jar app_process / com.genymobile.scrcpy.Server 3.3.1"
+        " tunnel_forward=true audio=false control=false cleanup=false raw_stream=true max_size=1920"
+    )
+    scrcpy_server_process=subprocess.Popen(cmd,stderr=subprocess.PIPE,stdout=subprocess.PIPE,text=True)
+
+    if scrcpy_server_process.stdout:
+        for line in scrcpy_server_process.stdout:
+            print(f"[SERVER]: {line.strip()}")
+            if "[server] INFO: Device:" in line:
+                print("[*] Scrcpy server setup complete")
+                return # Exit the function, leaving the process running
 
 def main():
     # Run scrcpy: scrcpy --no-control --tcpip=1234
-    # t=threading.Thread(target=setup_scrcpy_server)
-    # t.start()
-    # t.join()
+    t=threading.Thread(target=setup_scrcpy_server)
+    t.start()
+    t.join()
 
     root = tk.Tk()
     app = H264Renderer(root)
     root.mainloop()
+
+    if scrcpy_server_process:
+        scrcpy_server_process.terminate()   # !!! REQUIRED TO PREVENT GIT-BASH FROM HANGING DUE TO SUBPROCESS (scrcpy_server_process) still running
+        scrcpy_server_process.wait()    
 
 if __name__ == "__main__":
     main()
