@@ -29,7 +29,7 @@ class Controller():
         self.view.set_click_callback(self.on_click)
         self.stream_state.set_new_frame_callback(self.on_new_frame)
         self.view.set_close_callback(self.stop)
-        self.stream_service.set_frame_callback(self.stream_state.update_frame)
+        self.stream_service.set_frame_callback(self.stream_state.set_frame)
     
     def start(self) -> None:
         self.scrcpy_service.start_server()
