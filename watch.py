@@ -6,7 +6,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 # The file we want to run and watch
-APP_FILE = "main2.py" 
+APP_FILE = "main3.py" 
 
 class AppReloader(FileSystemEventHandler):
     def __init__(self):
