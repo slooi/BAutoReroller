@@ -123,7 +123,7 @@ class ScrcpyServerService:
             self.process = None
 
 
-class StreamService:
+class StreamClientService:
     """Service: Handles H.264 stream decoding"""
     
     def __init__(self, config: Config, model: StreamModel):
@@ -247,7 +247,7 @@ class StreamController:
         self.view = StreamView(config)
         self.adb_service = ADBService(config.device_serial)
         self.server_service = ScrcpyServerService()
-        self.stream_service = StreamService(config, self.model)
+        self.stream_client_service = StreamClientService(config, self.model)
         
         # Wire up observers & callbacks
         self.view.add_click_observer(self)
@@ -255,7 +255,7 @@ class StreamController:
         self.view.set_close_callback(self.stop)
         
         # Override view's render loop
-        self.view._render_loop = self._render_loop
+        # self.view._render_loop = self._render_loop
     
     def start(self) -> None:
         """Start the entire application"""
@@ -267,14 +267,14 @@ class StreamController:
         
         # Start streaming
         self.model.start()
-        self.stream_service.start_streaming()
+        self.stream_client_service.start_streaming()
         
         # Start GUI (blocking)
         self.view.start()
     
     def stop(self) -> None:
         """Clean shutdown of all components"""
-        self.stream_service.stop_streaming()
+        self.stream_client_service.stop_streaming()
         self.server_service.stop_server()
         self.view.close()
     
@@ -282,7 +282,8 @@ class StreamController:
     def on_new_frame(self, event: FrameEvent) -> None:
         """Handle new frame from model"""
         # This runs in the background thread, so we schedule GUI update
-        self.view.root.after_idle(lambda: self.view.update_frame(event.frame))
+        self.view.update_frame(event.frame)
+        # self.view.root.after_idle(lambda: )
     
     def on_click(self, event: ClickEvent) -> None:
         """Handle click from view"""
@@ -298,16 +299,16 @@ class StreamController:
         """Handle window close"""
         self.stop()
     
-    def _render_loop(self) -> None:
-        """Optimized render loop"""
-        frame = self.model.get_latest_frame()
-        if frame:
-            self.view.update_frame(frame)
+    # def _render_loop(self) -> None:
+    #     """Optimized render loop"""
+    #     frame = self.model.get_latest_frame()
+    #     if frame:
+    #         self.view.update_frame(frame)
         
-        if self.model.is_running:
-            self.view.root.after(1000 // self.config.max_fps, self._render_loop)
-        else:
-            self.view.close()
+    #     if self.model.is_running:
+    #         self.view.root.after(1000 // self.config.max_fps, self._render_loop)
+    #     else:
+    #         self.view.close()
 
 
 # --- MAIN ---
