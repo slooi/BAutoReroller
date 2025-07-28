@@ -1,12 +1,11 @@
-# run.py
 import time
 import subprocess
 import sys
+import os
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-# The file we want to run and watch
-APP_FILE = "main.py" 
+APP_FILE = "main.py"
 
 class AppReloader(FileSystemEventHandler):
     def __init__(self):
@@ -14,29 +13,33 @@ class AppReloader(FileSystemEventHandler):
         self.start_process()
 
     def start_process(self):
-        """Start or restart the Tkinter application."""
+        """Start or restart the Python application."""
         if self.process:
             print("Restarting app...")
-            self.process.kill()  # Forcefully kill the old process
-            self.process.wait()  # Wait for it to be fully killed
-        
-        # Start a new process
+            self.process.kill()
+            self.process.wait()
+
         self.process = subprocess.Popen([sys.executable, APP_FILE])
         print(f"App started with PID: {self.process.pid}")
 
-    def on_modified(self, event):
-        """Called when a file is modified."""
-        if event.src_path.endswith(APP_FILE):
-            print(f"Change detected in {APP_FILE}.")
-            self.start_process()
+    def on_any_event(self, event):
+        """Called when a file is modified, created, deleted, or moved."""
+        if (
+            event.is_directory
+            or not event.src_path.endswith(".py")
+        ):
+            return
+
+        print(f"Change detected in: {event.src_path}")
+        self.start_process()
 
 if __name__ == "__main__":
-    path = "."  # Watch the current directory
+    watch_path = "."  # Watch everything in the current directory
     event_handler = AppReloader()
     observer = Observer()
-    observer.schedule(event_handler, path, recursive=False)
+    observer.schedule(event_handler, watch_path, recursive=True)
     observer.start()
-    print(f"Watching for changes in {APP_FILE}...")
+    print(f"Watching for changes in all .py files under {os.path.abspath(watch_path)}...")
 
     try:
         while True:
