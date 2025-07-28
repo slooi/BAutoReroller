@@ -13,7 +13,7 @@ from events_and_config.events_and_config import Config
 
 DecodedFrameCallback: TypeAlias = Callable[[Image.Image], None]
 
-class StreamClientService:
+class VideoReceiverService:
     """Receives and decodes H.264 frames over TCP from scrcpy."""
     
     def __init__(self, config: Config):

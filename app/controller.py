@@ -6,7 +6,7 @@ from app.stream_state import StreamState
 from events_and_config.events_and_config import ClickEvent, Config, FrameEvent
 from services.adb_service import ADBService
 from services.scrcpy_server_service import ScrcpyServerService
-from services.stream_client_service import StreamClientService
+from services.video_receiver_service import VideoReceiverService
 from ui.stream_ui import StreamView
 # -----------------------------
 # app/controller.py
@@ -23,7 +23,7 @@ class Controller():
         """ Setup Services """
         self.adb_service = ADBService(config.device_serial)
         self.scrcpy_service = ScrcpyServerService()
-        self.stream_service = StreamClientService(config)
+        self.stream_service = VideoReceiverService(config)
         
         """ Setup Callbacks """
         self.view.set_click_callback(self.on_click)
