@@ -23,9 +23,6 @@ class StreamClientService:
         self._frame_callback: Optional[DecodedFrameCallback] = None
         self._running = False
     
-    def set_frame_callback(self, callback: DecodedFrameCallback) -> None:
-        self._frame_callback = callback
-
     def start_streaming(self) -> None:
         self._running = True
         self.worker_thread = threading.Thread(target=self._stream_worker, daemon=True)
@@ -67,3 +64,8 @@ class StreamClientService:
             if sock:
                 sock.close()
             print("[*] Stream worker finished.")
+
+    """ CALLBACK FUNCTION SETTER """
+
+    def set_frame_callback(self, callback: DecodedFrameCallback) -> None:
+        self._frame_callback = callback
