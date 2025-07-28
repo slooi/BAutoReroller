@@ -146,22 +146,28 @@ class ScrcpyServerService:
 # -----------------------------
 # services/stream_client_service.py
 # -----------------------------
-DecodedFrameCallback = Callable[[Image.Image], None]
+DecodedFrameCallback: TypeAlias = Callable[[Image.Image], None]
+
 class StreamClientService:
     """Receives and decodes H.264 frames over TCP from scrcpy."""
     
-    def __init__(self, config: Config, state: StreamState):
+    def __init__(self, config: Config):
         self.config = config
-        self.stream_state = state
         self.codec = av.CodecContext.create("h264", "r")
         self.worker_thread: Optional[threading.Thread] = None
+        self._frame_callback: Optional[DecodedFrameCallback] = None
+        self._running = False
     
+    def set_frame_callback(self, callback: DecodedFrameCallback) -> None:
+        self._frame_callback = callback
+
     def start_streaming(self) -> None:
+        self._running = True
         self.worker_thread = threading.Thread(target=self._stream_worker, daemon=True)
         self.worker_thread.start()
     
     def stop_streaming(self) -> None:
-        self.stream_state.stop()
+        self._running = False
         if self.worker_thread:
             self.worker_thread.join(timeout=1.0)
     
@@ -174,7 +180,7 @@ class StreamClientService:
             sock = socket.create_connection((self.config.host, self.config.port))
             print("[*] Connected! Waiting for video stream...")
             
-            while self.stream_state.is_running:
+            while self._running:
                 data = sock.recv(4096)
                 if not data:
                     print("NO DATA BREAKING")
@@ -185,7 +191,8 @@ class StreamClientService:
                     for packet in packets:
                         frames = self.codec.decode(packet)
                         for frame in frames:
-                            self.stream_state.update_frame(frame.to_image())
+                            if self._frame_callback:
+                                self._frame_callback(frame.to_image())
                 except Exception as e:
                     print(f"[!] Decode error: {e}")
                     
@@ -194,7 +201,6 @@ class StreamClientService:
         finally:
             if sock:
                 sock.close()
-            self.stream_state.stop()
             print("[*] Stream worker finished.")
 
 
@@ -202,6 +208,7 @@ class StreamClientService:
 # ui/stream_view.py
 # -----------------------------
 ClickCallback: TypeAlias = Callable[[ClickEvent], None]
+
 class StreamView:
     """Tkinter GUI that displays frames and captures clicks."""
     
@@ -223,7 +230,7 @@ class StreamView:
     def update_frame(self, frame: Image.Image) -> None:
         photo_img = ImageTk.PhotoImage(image=frame)
         self.label.config(image=photo_img)
-        self.label.image = photo_img # type: ignore # Prevent GC
+        self.label.image = photo_img # type:ignore # Prevent GC
     
     def start(self) -> None:
         self.root.mainloop()
@@ -245,8 +252,8 @@ class StreamView:
             
     """ Callback Function Setters """
 
-    def set_click_callback(self,callback:ClickCallback):
-        self._click_callback=callback
+    def set_click_callback(self, callback: ClickCallback):
+        self._click_callback = callback
 
     def set_close_callback(self, callback: Callable) -> None:
         self._close_callback = callback
@@ -268,16 +275,16 @@ class Controller():
         """ Setup Services """
         self.adb_service = ADBService(config.device_serial)
         self.scrcpy_service = ScrcpyServerService()
-        self.stream_service = StreamClientService(config, self.stream_state)
+        self.stream_service = StreamClientService(config)
         
         """ Setup Callbacks """
         self.view.set_click_callback(self.on_click)
         self.stream_state.set_new_frame_callback(self.on_new_frame)
         self.view.set_close_callback(self.stop)
+        self.stream_service.set_frame_callback(self.stream_state.update_frame)
     
     def start(self) -> None:
         self.scrcpy_service.start_server()
-
         self.stream_state.start()
         self.stream_service.start_streaming()
         self.view.start()
@@ -293,7 +300,7 @@ class Controller():
         self.view.update_frame(event.frame)
     
     def on_click(self, event: ClickEvent) -> None:
-        self.adb_service.tap(event.x,event.y)
+        self.adb_service.tap(event.x, event.y)
 
 
 # -----------------------------
