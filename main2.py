@@ -212,7 +212,7 @@ class StreamView:
         """Update the displayed frame"""
         photo_img = ImageTk.PhotoImage(image=frame)
         self.label.config(image=photo_img)
-        self.label.image = photo_img  # Keep a reference
+        self.label.image = photo_img  # type: ignore # Keep a reference
     
     def start(self) -> None:
         self.root.mainloop()

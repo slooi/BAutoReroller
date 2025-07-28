@@ -10,6 +10,9 @@ import subprocess
 # --- Configuration ---
 # Set to your device serial if you have more than 1 device connected to adb.
 # You can find by typing `adb devices`. Example serials: adb-RJV8-su22._adb-tls-connect._tcp, 192.168.1.2:25345
+
+# 720x1600
+# 360 800
 DEVICE_SERIAL = "" 
 
 HOST = "127.0.0.1"
@@ -30,6 +33,7 @@ def adb_tap(x, y,device_serial=DEVICE_SERIAL):
 
 class H264Renderer:
     def __init__(self, root:tk.Tk):
+        root.geometry("360x800")
         self.root = root
         self.root.title(WINDOW_TITLE)
         self.label = tk.Label(root)
@@ -115,7 +119,7 @@ class H264Renderer:
         if frame_to_render:
             photo_img = ImageTk.PhotoImage(image=frame_to_render)
             self.label.config(image=photo_img)
-            self.label.image = photo_img
+            self.label.image = photo_img  # type: ignore
 
         # If the worker thread has stopped, close the window
         if not self.is_running:
