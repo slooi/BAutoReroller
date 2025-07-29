@@ -22,16 +22,22 @@ class AppReloader(FileSystemEventHandler):
         self.process = subprocess.Popen([sys.executable, APP_FILE])
         print(f"App started with PID: {self.process.pid}")
 
-    def on_any_event(self, event):
-        """Called when a file is modified, created, deleted, or moved."""
-        if (
-            event.is_directory
-            or not event.src_path.endswith(".py")
-        ):
+    def on_modified(self, event):
+        if event.is_directory or not event.src_path.endswith(".py"):
             return
+
+        # Skip if file contents didn't actually change
+        try:
+            mtime = os.path.getmtime(event.src_path)
+            if hasattr(self, '_last_mtime') and mtime == self._last_mtime:
+                return
+            self._last_mtime = mtime
+        except:
+            pass
 
         print(f"Change detected in: {event.src_path}")
         self.start_process()
+
 
 if __name__ == "__main__":
     watch_path = "."  # Watch everything in the current directory
