@@ -16,7 +16,6 @@ class StreamState:
         self.latest_frame: Optional[Image.Image] = None
         self.is_running = False
         self._lock = threading.Lock()
-        self._frame_callback: Optional[Callable[[FrameEvent], None]] = None
     
     def start(self) -> None:
         self.is_running = True
@@ -27,19 +26,9 @@ class StreamState:
     """ SETTER """
 
     def get_frame(self):
-        a=None
         with self._lock:
             return self.latest_frame
-        return a            
     
     def set_frame(self, frame: Image.Image) -> None:
         with self._lock:
             self.latest_frame = frame
-
-        if self._frame_callback:
-            self._frame_callback(FrameEvent(frame=frame))
-
-    """ CALLBACK FUNCTION SETTER """
-    
-    def set_new_frame_callback(self, callback: Callable[[FrameEvent], None]) -> None:
-        self._frame_callback = callback

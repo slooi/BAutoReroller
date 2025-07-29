@@ -28,7 +28,6 @@ class Controller():
         self.view.set_click_callback(self.on_click)
         
         self.t_receiverService.set_frame_callback(self.stream_state.set_frame)
-        # self.stream_state.set_new_frame_callback(self.on_new_frame)
         self.view.set_close_callback(self.stop)
     
     def start(self) -> None:
