@@ -106,7 +106,7 @@ class StreamView:
     """ CALLBACK FUNCTIONS """
 
     def _on_click(self, event) -> None:
-        ic(self._frame_size)
+        # ic(self._frame_size)
         if self._click_callback:
             click_event = ClickEvent(x=event.x, y=event.y)
             self._click_callback(click_event)
