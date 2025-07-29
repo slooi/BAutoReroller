@@ -25,7 +25,7 @@ class StreamView:
         self.config = config
 
         """ Local variables """
-        self.layout = Orientation.PORTRAIT
+        self._orientation = Orientation.PORTRAIT
 
         """ Tkinter setup """
         self.root = tk.Tk()
@@ -67,10 +67,21 @@ class StreamView:
         if not frame:
             return
         
+        self._set_orientation(frame)
+
         # frame.size
         photo_img = ImageTk.PhotoImage(image=frame.resize((self.config.window_size[0],self.config.window_size[1]),Image.Resampling.LANCZOS))
         self.image = photo_img # prevent GC
         self.canvas.create_image(0, 0, image=photo_img, anchor="nw")
+
+    def _set_orientation(self,frame:Image.Image):
+        configWidth=self.config.window_size[0]
+        configHeight=self.config.window_size[1]
+        configRatio = configWidth/configHeight
+        frameRatio = frame.width/frame.height
+
+        self._orientation = Orientation.PORTRAIT if frameRatio/configRatio==1 else Orientation.LANDSCAPE
+        # print(Orientation.PORTRAIT if frameRatio/configRatio==1 else Orientation.LANDSCAPE)
 
     # def _update_geometry(self,frame:Image.Image):
 
