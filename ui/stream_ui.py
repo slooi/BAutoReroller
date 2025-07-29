@@ -14,15 +14,18 @@ from utils.utils import ic
 ClickCallback: TypeAlias = Callable[[ClickEvent], None]
 GetFrameCallback: TypeAlias = Callable[[], Optional[Image.Image]]
 
-class Layout(Enum):
-    Normal = 0
-    Side = 1
+class Orientation(Enum):
+    PORTRAIT = 0
+    LANDSCAPE = 1
 
 class StreamView:
     """Tkinter GUI that displays frames and captures clicks."""
     
     def __init__(self, config: Config):
         self.config = config
+
+        """ Local variables """
+        self.layout = Orientation.PORTRAIT
 
         """ Tkinter setup """
         self.root = tk.Tk()
@@ -69,12 +72,14 @@ class StreamView:
         self.image = photo_img # prevent GC
         self.canvas.create_image(0, 0, image=photo_img, anchor="nw")
 
-    def _update_geometry(self,frame:Image.Image):
+    # def _update_geometry(self,frame:Image.Image):
+
+
         # Update geometry if changed
-        ic(frame.size==self._frame_size)
-        if (frame.size != self._frame_size):
-            self._set_geometry(self._frame_size)
-            self._frame_size = frame.size
+        # ic(frame.size==self._frame_size)
+        # if (frame.size != self._frame_size):
+        #     self._set_geometry(self._frame_size)
+        #     # self._frame_size = frame.size
 
 
 
