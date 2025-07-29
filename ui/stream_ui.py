@@ -90,6 +90,13 @@ class StreamView:
         orientation_size = self._get_orientation_size()
         self.root.geometry(f"{orientation_size[0]}x{orientation_size[1]}")
 
+    def _get_orientation_size(self):
+        configWidth = self.config.window_size[0]
+        configHeight = self.config.window_size[1]
+        if self._orientation == Orientation.PORTRAIT:
+            return (configWidth,configHeight)
+        else:
+            return (configHeight,configWidth)
 
 
     """ PUBLIC METHODS """
@@ -99,15 +106,6 @@ class StreamView:
     
     def close(self) -> None:
         self.root.destroy()
-
-
-    def _get_orientation_size(self):
-        configWidth = self.config.window_size[0]
-        configHeight = self.config.window_size[1]
-        if self._orientation == Orientation.PORTRAIT:
-            return (configWidth,configHeight)
-        else:
-            return (configHeight,configWidth)
 
     """ INTERNAL CALLBACK FUNCTIONS """
 
