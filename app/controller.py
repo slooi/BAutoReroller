@@ -18,7 +18,7 @@ class Controller():
         self.view = StreamView(config)
 
         """ Setup Services """
-        self.adb_service = ADBService(config.device_serial)
+        self.adb_service = ADBService(config)
         self.scrcpy_service = ScrcpyServerService(config.device_serial)
         self.t_receiverService = VideoReceiverService(config)
         

@@ -2,6 +2,8 @@
 import threading
 import subprocess
 from icecream import ic
+
+from events_and_config.events_and_config import Config
 # -----------------------------
 # services/adb_service.py
 # -----------------------------
@@ -9,8 +11,8 @@ from icecream import ic
 class ADBService:
     """Handles ADB tap commands via subprocess."""
     
-    def __init__(self, device_serial: str = ""):
-        self.device_serial = device_serial
+    def __init__(self, config: Config):
+        self.device_serial = config.device_serial
     
     def tap(self, x: int, y: int) -> None:
         threading.Thread(

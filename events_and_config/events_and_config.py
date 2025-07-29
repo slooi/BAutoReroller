@@ -1,5 +1,6 @@
 
 from dataclasses import dataclass
+from typing import Tuple
 from PIL import Image, ImageTk
 
 # -----------------------------
@@ -13,6 +14,7 @@ class Config:
     port: int = 1234
     window_title: str = "Android Reroller"
     window_size: tuple[int, int] = (360, 800)
+    device_size: tuple[int, int] = (720, 1600)
     max_fps: int = 1000
 
 # -----------------------------
@@ -21,7 +23,7 @@ class Config:
 
 @dataclass
 class ClickEvent:
-    x: float
-    y: float
+    x: int
+    y: int
 
 

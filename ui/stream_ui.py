@@ -26,6 +26,7 @@ class StreamView:
 
         """ Local variables """
         self._orientation = Orientation.PORTRAIT
+        self._frame_size = self.config.device_size
 
         """ Tkinter setup """
         self.root = tk.Tk()
@@ -84,6 +85,7 @@ class StreamView:
         orientation = Orientation.PORTRAIT if frameRatio/configRatio==1 else Orientation.LANDSCAPE
         if orientation!=self._orientation:
             self._orientation = orientation
+            self._frame_size = frame.size
             self._set_geometry(frame.size)
     
     def _set_geometry(self,size:Tuple[int,int]):
@@ -110,14 +112,22 @@ class StreamView:
     """ INTERNAL CALLBACK FUNCTIONS """
 
     def _on_resize(self,event):
-        print(event)
+        # print(event)
+        pass
 
     """ CALLBACK FUNCTIONS """
 
-    def _on_click(self, event) -> None:
+    def _on_click(self, event:tk.Event) -> None:
         # ic(self._frame_size)
         if self._click_callback:
-            click_event = ClickEvent(x=event.x, y=event.y)
+            orientation_size = self._get_orientation_size()
+            ic(orientation_size)
+            ic(event.x)
+            ic(self._frame_size)
+            device_click_x=round(event.x/orientation_size[0]*self._frame_size[0])
+            device_click_y=round(event.y/orientation_size[1]*self._frame_size[1])
+
+            click_event = ClickEvent(x=device_click_x, y=device_click_y)
             self._click_callback(click_event)
     
     def _on_close(self) -> None:
