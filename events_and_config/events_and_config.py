@@ -21,7 +21,7 @@ class Config:
 
 @dataclass
 class ClickEvent:
-    x: int
-    y: int
+    x: float
+    y: float
 
 

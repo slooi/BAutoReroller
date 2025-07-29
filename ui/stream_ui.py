@@ -70,10 +70,8 @@ class StreamView:
         self._set_orientation(frame)
 
         # frame.size
-        if self._orientation == Orientation.PORTRAIT:
-            photo_img = ImageTk.PhotoImage(image=frame.resize((self.config.window_size[0],self.config.window_size[1]),Image.Resampling.LANCZOS))
-        else:
-            photo_img = ImageTk.PhotoImage(image=frame.resize((self.config.window_size[1],self.config.window_size[0]),Image.Resampling.LANCZOS))
+        orientation_size = self._get_orientation_size()
+        photo_img = ImageTk.PhotoImage(image=frame.resize((orientation_size[0],orientation_size[1]),Image.Resampling.LANCZOS))
         self.image = photo_img # prevent GC
         self.canvas.create_image(0, 0, image=photo_img, anchor="nw")
 
@@ -84,20 +82,16 @@ class StreamView:
         frameRatio = frame.width/frame.height
 
         orientation = Orientation.PORTRAIT if frameRatio/configRatio==1 else Orientation.LANDSCAPE
-        ic(frame.size)
         if orientation!=self._orientation:
             self._orientation = orientation
             self._set_geometry(frame.size)
     
     def _set_geometry(self,size:Tuple[int,int]):
-        if self._orientation == Orientation.PORTRAIT:
-            self.root.geometry(f"{self.config.window_size[0]}x{self.config.window_size[1]}")
-        else:
-            ic(size)
-            self.root.geometry(f"{self.config.window_size[1]}x{self.config.window_size[0]}")
+        orientation_size = self._get_orientation_size()
+        self.root.geometry(f"{orientation_size[0]}x{orientation_size[1]}")
 
 
-            
+
     """ PUBLIC METHODS """
 
     def start(self) -> None:
@@ -107,7 +101,13 @@ class StreamView:
         self.root.destroy()
 
 
-
+    def _get_orientation_size(self):
+        configWidth = self.config.window_size[0]
+        configHeight = self.config.window_size[1]
+        if self._orientation == Orientation.PORTRAIT:
+            return (configWidth,configHeight)
+        else:
+            return (configHeight,configWidth)
 
     """ INTERNAL CALLBACK FUNCTIONS """
 
