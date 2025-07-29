@@ -70,7 +70,6 @@ class StreamView:
         
         self._set_orientation(frame)
 
-        # frame.size
         orientation_size = self._get_orientation_size()
         photo_img = ImageTk.PhotoImage(image=frame.resize((orientation_size[0],orientation_size[1]),Image.Resampling.LANCZOS))
         self.image = photo_img # prevent GC
@@ -112,13 +111,11 @@ class StreamView:
     """ INTERNAL CALLBACK FUNCTIONS """
 
     def _on_resize(self,event):
-        # print(event)
         pass
 
     """ CALLBACK FUNCTIONS """
 
     def _on_click(self, event:tk.Event) -> None:
-        # ic(self._frame_size)
         if self._click_callback:
             orientation_size = self._get_orientation_size()
             ic(orientation_size)
