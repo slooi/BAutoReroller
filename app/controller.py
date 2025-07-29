@@ -19,7 +19,7 @@ class Controller():
 
         """ Setup Services """
         self.adb_service = ADBService(config.device_serial)
-        self.scrcpy_service = ScrcpyServerService()
+        self.scrcpy_service = ScrcpyServerService(config.device_serial)
         self.t_receiverService = VideoReceiverService(config)
         
         """ Setup Callbacks """

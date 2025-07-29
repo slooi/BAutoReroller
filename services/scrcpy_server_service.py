@@ -12,7 +12,8 @@ from icecream import ic
 class ScrcpyServerService:
     """Starts/stops the scrcpy server via adb."""
     
-    def __init__(self):
+    def __init__(self,device_serial:str):
+        self.device_serial = device_serial
         self.process: Optional[subprocess.Popen] = None
     
     def start_server(self) -> None:
@@ -30,12 +31,14 @@ class ScrcpyServerService:
     """ PRIVATE METHODS """
 
     def _start_server_worker(self):
+        device_cmd = f"-s {self.device_serial} " if self.device_serial else ""
+        
         print("[*] Setting up scrcpy server")
-        subprocess.run("adb forward tcp:1234 localabstract:scrcpy", check=True)
+        subprocess.run(f"adb {device_cmd}forward tcp:1234 localabstract:scrcpy", check=True)
 
         print("[*] Starting scrcpy server...")
         cmd = (
-            "adb shell CLASSPATH=/data/local/tmp/scrcpy-server-manual.jar "
+            f"adb {device_cmd}shell CLASSPATH=/data/local/tmp/scrcpy-server-manual.jar "
             "app_process / com.genymobile.scrcpy.Server 3.3.1 "
             "tunnel_forward=true audio=false control=false "
             "cleanup=false raw_stream=true max_size=1920"
