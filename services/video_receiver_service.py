@@ -20,8 +20,10 @@ class VideoReceiverService:
         self.config = config
         self.codec = av.CodecContext.create("h264", "r")
         self.worker_thread: Optional[threading.Thread] = None
-        self._frame_callback: Optional[DecodedFrameCallback] = None
         self._running = False
+        self.latest_frame: Optional[Image.Image] = None
+        self._frame_updated = False
+        self._lock = threading.Lock()
     
     def start_streaming(self) -> None:
         self._running = True
@@ -44,17 +46,22 @@ class VideoReceiverService:
             
             while self._running:
                 data = sock.recv(4096)
+                # print("data",data)
+                # print(len(data))
                 if not data:
                     print("NO DATA BREAKING")
                     break
                 
                 try:
                     packets = self.codec.parse(data)
+                    self._frame_updated=True
                     for packet in packets:
+                        print("Returning asd")
                         frames = self.codec.decode(packet)
-                        for frame in frames:
-                            if self._frame_callback:
-                                self._frame_callback(frame.to_image())
+                        last_frame=frames[-1]
+                        if last_frame:
+                            with self._lock:
+                                self.latest_frame=last_frame.to_image()
                 except Exception as e:
                     print(f"[!] Decode error: {e}")
                     
@@ -65,7 +72,11 @@ class VideoReceiverService:
                 sock.close()
             print("[*] Stream worker finished.")
 
-    """ CALLBACK FUNCTION SETTER """
+    """ SETTER """
 
-    def set_frame_callback(self, callback: DecodedFrameCallback) -> None:
-        self._frame_callback = callback
+    def get_frame(self):
+        if not self._frame_updated:
+            return None
+        self._frame_updated=False
+        with self._lock:
+            return self.latest_frame
