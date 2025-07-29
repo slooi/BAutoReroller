@@ -47,7 +47,7 @@ class VideoReceiverService:
             while self._running:
                 data = sock.recv(4096)
                 if not data:
-                    print("NO DATA BREAKING")
+                    print("[!] NO DATA - BREAKING")
                     break
                 
                 try:
