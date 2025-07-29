@@ -32,7 +32,6 @@ class Controller():
     
     def start(self) -> None:
         self.scrcpy_service.start_server()
-        self.stream_state.start()
         self.t_receiverService.start_streaming()
         self.view.start()
     

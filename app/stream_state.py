@@ -14,14 +14,7 @@ class StreamState:
     
     def __init__(self):
         self.latest_frame: Optional[Image.Image] = None
-        self.is_running = False
         self._lock = threading.Lock()
-    
-    def start(self) -> None:
-        self.is_running = True
-    
-    def stop(self) -> None:
-        self.is_running = False
 
     """ SETTER """
 
