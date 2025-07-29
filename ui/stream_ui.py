@@ -2,15 +2,21 @@
 # -----------------------------
 # ui/stream_view.py
 # -----------------------------
+from enum import Enum
 import tkinter as tk
 from PIL import Image, ImageTk
-from typing import Callable, Optional, TypeAlias
+from typing import Callable, Optional, Tuple, TypeAlias
 
 from events_and_config.events_and_config import ClickEvent, Config
+from utils.utils import ic
 
 
 ClickCallback: TypeAlias = Callable[[ClickEvent], None]
 GetFrameCallback: TypeAlias = Callable[[], Optional[Image.Image]]
+
+class Layout(Enum):
+    Normal = 0
+    Side = 1
 
 class StreamView:
     """Tkinter GUI that displays frames and captures clicks."""
@@ -21,7 +27,7 @@ class StreamView:
         """ Tkinter setup """
         self.root = tk.Tk()
         self.root.title(config.window_title)
-        self.root.geometry(f"{config.window_size[0]}x{config.window_size[1]}")
+        self._set_geometry(self.config.window_size)
 
         self.canvas=tk.Canvas(self.root)
         self.canvas.pack(expand=True,fill="both")
@@ -38,10 +44,16 @@ class StreamView:
 
         self._render_loop()
 
+
+
+    """ CORE FUNCTIONALITY """
+
     def _render_loop(self) -> None:
         """Core render loop"""
         self._render_frame()
         self.root.after(1000 // self.config.max_fps, self._render_loop)
+
+    """ CORE SUB FUNCTIONALITY """
     
     def _render_frame(self):
         """Renders a single frame"""
@@ -57,11 +69,34 @@ class StreamView:
         self.image = photo_img # prevent GC
         self.canvas.create_image(0, 0, image=photo_img, anchor="nw")
 
+    def _update_geometry(self,frame:Image.Image):
+        # Update geometry if changed
+        ic(frame.size==self._frame_size)
+        if (frame.size != self._frame_size):
+            self._set_geometry(self._frame_size)
+            self._frame_size = frame.size
+
+
+
+
+    """ HELPER METHODS """
+
+    def _set_geometry(self,size:Tuple[int,int]):
+        self.root.geometry(f"{size[0]}x{size[1]}")
+    
+    # def _
+
+
+    """ PUBLIC METHODS """
+
     def start(self) -> None:
         self.root.mainloop()
     
     def close(self) -> None:
         self.root.destroy()
+
+
+
 
     """ INTERNAL CALLBACK FUNCTIONS """
 
@@ -71,6 +106,7 @@ class StreamView:
     """ CALLBACK FUNCTIONS """
 
     def _on_click(self, event) -> None:
+        ic(self._frame_size)
         if self._click_callback:
             click_event = ClickEvent(x=event.x, y=event.y)
             self._click_callback(click_event)
