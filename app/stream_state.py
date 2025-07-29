@@ -25,6 +25,12 @@ class StreamState:
         self.is_running = False
 
     """ SETTER """
+
+    def get_frame(self):
+        a=None
+        with self._lock:
+            return self.latest_frame
+        return a            
     
     def set_frame(self, frame: Image.Image) -> None:
         with self._lock:

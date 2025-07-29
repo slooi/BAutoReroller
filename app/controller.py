@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from icecream import ic
-from PIL import Image, ImageTk
 
 from app.stream_state import StreamState
 from events_and_config.events_and_config import ClickEvent, Config, FrameEvent
@@ -18,27 +17,28 @@ class Controller():
     def __init__(self, config: Config):
         self.config = config
         self.stream_state = StreamState()
-        self.view = StreamView(config)
+        self.view = StreamView(config,self.stream_state)
 
         """ Setup Services """
         self.adb_service = ADBService(config.device_serial)
         self.scrcpy_service = ScrcpyServerService()
-        self.stream_service = VideoReceiverService(config)
+        self.t_receiverService = VideoReceiverService(config)
         
         """ Setup Callbacks """
         self.view.set_click_callback(self.on_click)
-        self.stream_state.set_new_frame_callback(self.on_new_frame)
+        
+        self.t_receiverService.set_frame_callback(self.stream_state.set_frame)
+        # self.stream_state.set_new_frame_callback(self.on_new_frame)
         self.view.set_close_callback(self.stop)
-        self.stream_service.set_frame_callback(self.stream_state.set_frame)
     
     def start(self) -> None:
         self.scrcpy_service.start_server()
         self.stream_state.start()
-        self.stream_service.start_streaming()
+        self.t_receiverService.start_streaming()
         self.view.start()
     
     def stop(self) -> None:
-        self.stream_service.stop_streaming()
+        self.t_receiverService.stop_streaming()
         self.scrcpy_service.stop_server()
         self.view.close()
     
