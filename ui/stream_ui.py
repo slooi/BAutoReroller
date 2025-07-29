@@ -6,9 +6,9 @@ from enum import Enum
 import tkinter as tk
 from PIL import Image, ImageTk
 from typing import Callable, Optional, Tuple, TypeAlias
+from icecream import ic
 
 from events_and_config.events_and_config import ClickEvent, Config
-from utils.utils import ic
 
 
 ClickCallback: TypeAlias = Callable[[ClickEvent], None]
@@ -70,7 +70,10 @@ class StreamView:
         self._set_orientation(frame)
 
         # frame.size
-        photo_img = ImageTk.PhotoImage(image=frame.resize((self.config.window_size[0],self.config.window_size[1]),Image.Resampling.LANCZOS))
+        if self._orientation == Orientation.PORTRAIT:
+            photo_img = ImageTk.PhotoImage(image=frame.resize((self.config.window_size[0],self.config.window_size[1]),Image.Resampling.LANCZOS))
+        else:
+            photo_img = ImageTk.PhotoImage(image=frame.resize((self.config.window_size[1],self.config.window_size[0]),Image.Resampling.LANCZOS))
         self.image = photo_img # prevent GC
         self.canvas.create_image(0, 0, image=photo_img, anchor="nw")
 
@@ -80,29 +83,21 @@ class StreamView:
         configRatio = configWidth/configHeight
         frameRatio = frame.width/frame.height
 
-        self._orientation = Orientation.PORTRAIT if frameRatio/configRatio==1 else Orientation.LANDSCAPE
-        # print(Orientation.PORTRAIT if frameRatio/configRatio==1 else Orientation.LANDSCAPE)
-
-    # def _update_geometry(self,frame:Image.Image):
-
-
-        # Update geometry if changed
-        # ic(frame.size==self._frame_size)
-        # if (frame.size != self._frame_size):
-        #     self._set_geometry(self._frame_size)
-        #     # self._frame_size = frame.size
-
-
-
-
-    """ HELPER METHODS """
-
-    def _set_geometry(self,size:Tuple[int,int]):
-        self.root.geometry(f"{size[0]}x{size[1]}")
+        orientation = Orientation.PORTRAIT if frameRatio/configRatio==1 else Orientation.LANDSCAPE
+        ic(frame.size)
+        if orientation!=self._orientation:
+            self._orientation = orientation
+            self._set_geometry(frame.size)
     
-    # def _
+    def _set_geometry(self,size:Tuple[int,int]):
+        if self._orientation == Orientation.PORTRAIT:
+            self.root.geometry(f"{self.config.window_size[0]}x{self.config.window_size[1]}")
+        else:
+            ic(size)
+            self.root.geometry(f"{self.config.window_size[1]}x{self.config.window_size[0]}")
 
 
+            
     """ PUBLIC METHODS """
 
     def start(self) -> None:
