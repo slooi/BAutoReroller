@@ -46,8 +46,6 @@ class VideoReceiverService:
             
             while self._running:
                 data = sock.recv(4096)
-                # print("data",data)
-                # print(len(data))
                 if not data:
                     print("NO DATA BREAKING")
                     break
@@ -56,7 +54,6 @@ class VideoReceiverService:
                     packets = self.codec.parse(data)
                     self._frame_updated=True
                     for packet in packets:
-                        print("Returning asd")
                         frames = self.codec.decode(packet)
                         last_frame=frames[-1]
                         if last_frame:
