@@ -13,7 +13,7 @@ class Config:
     port: int = 1234
     window_title: str = "scrcpy Real-Time Stream (Low Latency)"
     window_size: tuple[int, int] = (360, 800)
-    max_fps: int = 30
+    max_fps: int = 1000
 
 # -----------------------------
 # core/events.py
@@ -24,7 +24,4 @@ class ClickEvent:
     x: int
     y: int
 
-@dataclass
-class FrameEvent:
-    frame: Image.Image
 
