@@ -39,17 +39,24 @@ class StreamView:
         self._render_loop()
 
     def _render_loop(self) -> None:
-        """Placeholder render loop - controller will override this"""
-        if self._get_frame_callback:
-            frame=self._get_frame_callback()
-            # print(frame)
-            if frame:
-                # frame.size
-                photo_img = ImageTk.PhotoImage(image=frame.resize((self.config.window_size[0],self.config.window_size[1]),Image.Resampling.LANCZOS))
-                self.image = photo_img # prevent GC
-                self.canvas.create_image(0, 0, image=photo_img, anchor="nw")
+        """Core render loop"""
+        self._render_frame()
         self.root.after(1000 // self.config.max_fps, self._render_loop)
     
+    def _render_frame(self):
+        """Renders a single frame"""
+        if not self._get_frame_callback:
+            return
+        
+        frame=self._get_frame_callback()
+        if not frame:
+            return
+        
+        # frame.size
+        photo_img = ImageTk.PhotoImage(image=frame.resize((self.config.window_size[0],self.config.window_size[1]),Image.Resampling.LANCZOS))
+        self.image = photo_img # prevent GC
+        self.canvas.create_image(0, 0, image=photo_img, anchor="nw")
+
     def start(self) -> None:
         self.root.mainloop()
     
